@@ -7,7 +7,7 @@ from PIL import Image
 import io
 
 # Define the folder containing the JSON files
-JSON_FOLDER = 'ratings_female'
+JSON_FOLDER = 'ratings_female_augm_456'
 
 # Function to read and parse JSON files
 def read_json_files(folder_path):
@@ -42,6 +42,31 @@ print("\nNumber of images in each rating category:")
 for rating, count in sorted(rating_counts.items()):
     print(f"Rating {rating}: {count} images")
 
+import gc
+
+def plot_random_image(images, rating):
+    if images:
+        img_data = random.choice(images)
+        decoded_data = base64.b64decode(img_data.split(",")[1].strip())
+        img = Image.open(io.BytesIO(decoded_data))
+        plt.imshow(img)
+        plt.title(f"Rating: {rating}")
+        plt.axis('off')
+        fig = plt.gcf()
+        
+        def on_key(event):
+            if event.key == 'q':
+                plt.close(fig)
+            else:
+                plt.close(fig)
+                plot_random_image(images, rating)
+            gc.collect()  # Trigger garbage collection after closing the image
+
+        fig.canvas.mpl_connect('key_press_event', on_key)
+        plt.show()
+    else:
+        print(f"No images found for rating {rating}.")
+
 # Allow user to search for images by rating category
 while True:
     search_rating = input("\nEnter the rating category (0-9) to search for images (or 'q' to quit): ")
@@ -51,16 +76,7 @@ while True:
         search_rating = int(search_rating)
         if 0 <= search_rating <= 9:
             images = search_by_rating(json_data, search_rating)
-            if images:
-                img_data = random.choice(images)
-                decoded_data = base64.b64decode(img_data.split(",")[1].strip())
-                img = Image.open(io.BytesIO(decoded_data))
-                plt.imshow(img)
-                plt.title(f"Rating: {search_rating}")
-                plt.axis('off')
-                plt.show()
-            else:
-                print(f"No images found for rating {search_rating}.")
+            plot_random_image(images, search_rating)
         else:
             print("Invalid rating category. Please enter a number between 0 and 9.")
     except ValueError:
