@@ -1,4 +1,5 @@
 .venv/
 path_to_save/
-ratings_female/
-ratings_male/
+training_data/
+testing_data/
+model_0.0005_2_dropout_organized/
